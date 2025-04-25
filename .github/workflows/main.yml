@@ -27,10 +27,16 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Corrigir permissões do diretório
+      - name: Corrigir permissões de todos os diretórios no caminho
         run: |
+          sudo chmod -R 777 ./resources
           sudo chmod -R 777 ./resources/app
+          sudo chown -R runner:runner ./resources
           sudo chown -R runner:runner ./resources/app
+
+      - name: Forçar remoção do diretório
+        run: |
+          sudo rm -rf ./resources/app
 
       - name: Instalar dependências do projeto
         run: |
@@ -83,7 +89,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: https://andre-min.github.io/ron-bugado-academy13-front-robot/report.html
+      url: https://andre-min.github.io/testing-mobile/report.html
       
     steps:
       - name: Setup Pages
