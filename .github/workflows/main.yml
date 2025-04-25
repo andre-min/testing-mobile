@@ -30,6 +30,7 @@ jobs:
       - name: Corrigir permissões do diretório
         run: |
           sudo chmod -R 777 ./resources/app
+          sudo chown -R runner:runner ./resources/app
 
       - name: Instalar dependências do projeto
         run: |
@@ -38,6 +39,12 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
+
+      - name: Finalizar containers Docker e processos
+        run: |
+          docker ps -q | xargs -r docker stop
+          docker ps -aq | xargs -r docker rm
+          echo "Containers Docker finalizados..."
 
       - name: Iniciar Appium no container
         run: |
