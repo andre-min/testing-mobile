@@ -26,7 +26,9 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
-
+        with:
+          clean: false
+          
       - name: Corrigir permissões de todos os diretórios no caminho
         run: |
           sudo chmod -R 777 ./resources
