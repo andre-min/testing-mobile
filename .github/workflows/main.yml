@@ -20,25 +20,30 @@ jobs:
         env:
           EMULATOR_DEVICE: Samsung Galaxy S10
           WEB_VNC: true
-        volumes:
-          - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
         with:
           clean: false
-          
-      - name: Corrigir permissões de todos os diretórios no caminho
-        run: |
-          sudo chmod -R 777 ./resources
-          sudo chmod -R 777 ./resources/app
-          sudo chown -R runner:runner ./resources
-          sudo chown -R runner:runner ./resources/app
 
-      - name: Forçar remoção do diretório
+      - name: Corrigir permissões de diretórios
         run: |
-          sudo rm -rf ./resources/app
+          sudo chmod -R 777 ./resources || true
+          sudo chmod -R 777 ./resources/app || true
+          sudo chown -R runner:runner ./resources || true
+          sudo chown -R runner:runner ./resources/app || true
+
+      - name: Forçar remoção do diretório se existir
+        run: |
+          sudo rm -rf ./resources/app || true
+
+      - name: Criar diretório e adicionar APK
+        run: |
+          mkdir -p ./resources/app
+          echo "Simulando cópia de APK..."
+          # Substitua o comando abaixo pelo real caminho do seu APK, se necessário
+          touch ./resources/app/app.apk
 
       - name: Instalar dependências do projeto
         run: |
@@ -48,23 +53,26 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Finalizar containers Docker e processos
+      - name: Verificar containers Docker
+        run: docker ps
+
+      - name: Aguardar inicialização do emulador
         run: |
-          docker ps -q | xargs -r docker stop
-          docker ps -aq | xargs -r docker rm
-          echo "Containers Docker finalizados..."
+          echo "Aguardando o emulador inicializar..."
+          sleep 60
+
+      - name: Copiar APK para dentro do container
+        run: |
+          docker cp ./resources/app/app.apk android:/home/androidusr/app.apk
 
       - name: Iniciar Appium no container
         run: |
-          docker ps
           docker exec android android wait-for-emulator
           docker exec -d android appium -pa /wd/hub
           echo "Appium iniciado..."
 
-      - name: Aguardar inicialização do emulador e Appium
-        run: |
-          echo "Aguardando o emulador e Appium estarem prontos..."
-          sleep 60
+      - name: Aguardar inicialização do Appium
+        run: sleep 20
 
       - name: Executar os testes
         run: |
@@ -100,7 +108,7 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: robot-framework-report
+          name: relatorios-de-teste
           path: results/
 
       - name: Upload artifact
