@@ -1,25 +1,6 @@
-name: Testes Mobile com Robot Framework
-
-on:
-  push:
-    branches: [ main, workflow_dispatch ]
-
 jobs:
   run-tests:
     runs-on: ubuntu-24.04
-
-    services:
-      android:
-        image: budtmo/docker-android:emulator_11.0
-        ports:
-          - 4723:4723
-          - 6080:6080
-        options: >-
-          --privileged
-          --device /dev/kvm
-        env:
-          EMULATOR_DEVICE: Samsung Galaxy S10
-          WEB_VNC: true
 
     steps:
       - name: Checkout do código
@@ -42,19 +23,20 @@ jobs:
         run: |
           mkdir -p ./resources/app
           echo "Simulando cópia de APK..."
-          # Substitua o comando abaixo pelo real caminho do seu APK, se necessário
+          # Substitua este comando pelo real
           touch ./resources/app/app.apk
 
-      - name: Instalar dependências do projeto
+      - name: Subir container Android manualmente
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Verificar containers Docker
-        run: docker ps
+          docker run -d \
+            --name android \
+            --privileged \
+            --device /dev/kvm \
+            -e EMULATOR_DEVICE="Samsung Galaxy S10" \
+            -e WEB_VNC=true \
+            -p 4723:4723 \
+            -p 6080:6080 \
+            budtmo/docker-android:emulator_11.0
 
       - name: Aguardar inicialização do emulador
         run: |
@@ -71,8 +53,16 @@ jobs:
           docker exec -d android appium -pa /wd/hub
           echo "Appium iniciado..."
 
-      - name: Aguardar inicialização do Appium
+      - name: Aguardar Appium
         run: sleep 20
+
+      - name: Instalar dependências do projeto
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
 
       - name: Executar os testes
         run: |
@@ -85,37 +75,3 @@ jobs:
         with:
           name: relatorios-de-teste
           path: results/
-
-  deploy:
-    name: Deploy GitHub Pages
-    runs-on: ubuntu-24.04
-    if: always()
-    needs:
-      - run-tests
-
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: https://andre-min.github.io/testing-mobile/report.html
-      
-    steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: relatorios-de-teste
-          path: results/
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: results/
-
-      - name: Deploy to Github Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
