@@ -1,4 +1,11 @@
 jobs:
+name: Testes Mobile com Robot Framework
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
   run-tests:
     runs-on: ubuntu-24.04
 
