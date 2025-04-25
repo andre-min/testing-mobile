@@ -20,9 +20,8 @@ jobs:
         env:
           EMULATOR_DEVICE: Samsung Galaxy S10
           WEB_VNC: true
-
-    volumes:
-      - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
+        volumes:
+          - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
 
     steps:
       - name: Checkout do código
@@ -77,7 +76,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: https://andre-min.github.io/testing-mobile/report.html
+      url: https://andre-min.github.io/ron-bugado-academy13-front-robot/report.html
       
     steps:
       - name: Setup Pages
