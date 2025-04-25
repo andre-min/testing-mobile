@@ -20,12 +20,17 @@ jobs:
         env:
           EMULATOR_DEVICE: Samsung Galaxy S10
           WEB_VNC: true
-        volumes:
-          - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
+
+    volumes:
+      - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
+
+      - name: Corrigir permissões do diretório
+        run: |
+          sudo chmod -R 777 ./resources/app
 
       - name: Instalar dependências do projeto
         run: |
@@ -51,7 +56,6 @@ jobs:
         run: |
           source venv/bin/activate
           robot --outputdir results/ .
-          
 
       - name: Salvar artefatos (relatórios)
         uses: actions/upload-artifact@v4
@@ -73,9 +77,8 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: https://andre-min.github.io/ron-bugado-academy13-front-robot/report.html
+      url: https://andre-min.github.io/testing-mobile/report.html
       
-           
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v4
