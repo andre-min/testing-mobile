@@ -1,0 +1,7 @@
+interests:
+  title: Topics_Title
+  nextButton: Next
+  android:
+    interestList: //android.widget.TextView[@resource-id="Typography" and @text="{text}"]
+  ios:
+    interestList: //ios.widget.TextView[@resource-id="Typography" and @text="{text}"]

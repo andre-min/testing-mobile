@@ -1,0 +1,4 @@
+welcome:
+  title: android:id/alertTitle
+  updatePopUp: android:id/button2
+  nextButton: Next

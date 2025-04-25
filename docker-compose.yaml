@@ -1,0 +1,17 @@
+services:
+  android-emulator:
+    image: budtmo/docker-android:emulator_11.0
+    container_name: android-container
+    ports:
+      - "6080:6080"  # Porta para acesso ao VNC
+      - "4723:4723"  # Expondo a porta do Appium
+    environment:
+      - EMULATOR_DEVICE=Samsung Galaxy S10
+      - WEB_VNC=true
+    devices:
+      - /dev/kvm  # Para permitir que o emulador use o KVM
+    volumes:
+      - ./resource/app/app.apk:/home/androidusr/app.apk  # Diretório local com o APK será montado no contêiner
+    stdin_open: true
+    tty: true
+    restart: always

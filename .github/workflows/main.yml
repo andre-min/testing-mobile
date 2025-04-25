@@ -1,0 +1,96 @@
+name: Testes Mobile com Robot Framework
+
+on:
+  push:
+    branches: [ main, workflow_dispatch ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-24.04
+
+    services:
+      android:
+        image: budtmo/docker-android:emulator_11.0
+        ports:
+          - 4723:4723
+          - 6080:6080
+        options: >-
+          --privileged
+          --device /dev/kvm
+        env:
+          EMULATOR_DEVICE: Samsung Galaxy S10
+          WEB_VNC: true
+        volumes:
+          - ${{ github.workspace }}/resources/app/app.apk:/home/androidusr/app.apk
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Instalar dependências do projeto
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Iniciar Appium no container
+        run: |
+          docker ps
+          docker exec android android wait-for-emulator
+          docker exec -d android appium -pa /wd/hub
+          echo "Appium iniciado..."
+
+      - name: Aguardar inicialização do emulador e Appium
+        run: |
+          echo "Aguardando o emulador e Appium estarem prontos..."
+          sleep 60
+
+      - name: Executar os testes
+        run: |
+          source venv/bin/activate
+          robot --outputdir results/ .
+          
+
+      - name: Salvar artefatos (relatórios)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorios-de-teste
+          path: results/
+
+  deploy:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-24.04
+    if: always()
+    needs:
+      - run-tests
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: https://andre-min.github.io/ron-bugado-academy13-front-robot/report.html
+      
+           
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: robot-framework-report
+          path: results/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: results/
+
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
