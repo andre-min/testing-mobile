@@ -5,5 +5,6 @@ Resource    ../../base.resource
 View Home
     
     Wait Until Element Is Visible    ${home.homeScreen}
+    Capture Page Screenshot
 
 

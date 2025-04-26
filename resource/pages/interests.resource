@@ -8,4 +8,5 @@ Select interest
     Wait Until Element Is Visible    locator=${interests.title}
     # -v PLATFORM_NAME:ios
     Wait Visible And Click Element    ${interests.${PLATFORM_NAME}.interestList.format(text='${interestName}')}
+    Capture Page Screenshot
     Wait Enabled And Click Element    ${interests.nextButton}

@@ -8,6 +8,8 @@ services:
     environment:
       - EMULATOR_DEVICE=Samsung Galaxy S10
       - WEB_VNC=true
+      - APPIUM=true
+      - APPIUM_ADDITIONAL_ARGS=--base-path /wd/hub
     devices:
       - /dev/kvm  # Para permitir que o emulador use o KVM
     volumes:

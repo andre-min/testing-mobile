@@ -1,75 +1,46 @@
 name: Testes Mobile com Robot Framework
 
-on:
+on: 
   push:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   run-tests:
+
     runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
         with:
-          clean: false
+          python-version: '3.12'
 
-      - name: Corrigir permissões de diretórios
+      - name: Instalar dependências
         run: |
-          sudo chmod -R 777 ./resources || true
-          sudo chmod -R 777 ./resources/app || true
-          sudo chown -R runner:runner ./resources || true
-          sudo chown -R runner:runner ./resources/app || true
-
-      - name: Forçar remoção do diretório se existir
-        run: |
-          sudo rm -rf ./resources/app || true
-
-      - name: Criar diretório e adicionar APK
-        run: |
-          mkdir -p ./resources/app
-          echo "Simulando cópia de APK..."
-          # Substitua este comando pelo real se necessário
-          touch ./resources/app/app.apk
-
-      - name: Subir container Android manualmente
-        run: |
-          docker run -d \
-            --name android \
-            --privileged \
-            --device /dev/kvm \
-            -e EMULATOR_DEVICE="Samsung Galaxy S10" \
-            -e WEB_VNC=true \
-            -p 4723:4723 \
-            -p 6080:6080 \
-            budtmo/docker-android:emulator_11.0
-
-      - name: Aguardar inicialização do emulador
-        run: |
-          echo "Aguardando o emulador inicializar..."
-          sleep 60
-
-      - name: Copiar APK para dentro do container
-        run: |
-          docker cp ./resources/app/app.apk android:/home/androidusr/app.apk
-
-      - name: Iniciar Appium no container
-        run: |
-          docker exec android android wait-for-emulator
-          docker exec -d android appium -pa /wd/hub
-          echo "Appium iniciado..."
-
-      - name: Aguardar Appium
-        run: sleep 20
-
-      - name: Instalar dependências do projeto
-        run: |
-          sudo apt update
-          sudo apt install -y python3-pip
           python -m venv venv
           source venv/bin/activate
+          pip install --upgrade pip 
           pip install -r requirements.txt
+
+      - name: Instalar o Docker
+        run: |
+          sudo apt update
+          sudo apt install -y docker.io
+
+      - name: Instalar Docker Compose
+        run: |
+          sudo apt install -y docker-compose
+
+      - name: Subir ambiente com Docker Compose
+        run: |
+          docker compose up -d
+
+      - name: Aguardar container iniciar
+        run: sleep 40
 
       - name: Executar os testes
         run: |
@@ -116,3 +87,6 @@ jobs:
       - name: Deploy to Github Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+
+    
