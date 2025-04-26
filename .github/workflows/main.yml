@@ -1,13 +1,12 @@
 name: Testes Mobile com Robot Framework
 
-on: 
+on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   run-tests:
-
     runs-on: ubuntu-24.04
 
     steps:
@@ -19,32 +18,25 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar dependências
+      - name: Instalar dependências e criar ambiente virtual
         run: |
           python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip 
+          . venv/bin/activate
+          pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Instalar o Docker
-        run: |
-          sudo apt update
-          sudo apt install -y docker.io
-
-      - name: Instalar Docker Compose
-        run: |
-          sudo apt install -y docker-compose
+      - name: Configurar Docker no ambiente
+        uses: docker/setup-buildx-action@v3
 
       - name: Subir ambiente com Docker Compose
-        run: |
-          docker compose up -d
+        run: docker compose up -d
 
-      - name: Aguardar container iniciar
+      - name: Aguardar containers inicializarem
         run: sleep 40
 
-      - name: Executar os testes
+      - name: Executar testes Robot Framework
         run: |
-          source venv/bin/activate
+          . venv/bin/activate
           robot --outputdir results/ .
 
       - name: Salvar artefatos (relatórios)
@@ -55,7 +47,7 @@ jobs:
           path: results/
 
   deploy:
-    name: Deploy GitHub Pages
+    name: Deploy no GitHub Pages
     runs-on: ubuntu-24.04
     if: always()
     needs:
@@ -68,25 +60,22 @@ jobs:
     environment:
       name: github-pages
       url: https://andre-min.github.io/testing-mobile/report.html
-      
+
     steps:
-      - name: Setup Pages
+      - name: Configurar GitHub Pages
         uses: actions/configure-pages@v4
 
-      - name: Download Artifacts
+      - name: Baixar artefatos (relatórios)
         uses: actions/download-artifact@v4
         with:
           name: relatorios-de-teste
           path: results/
 
-      - name: Upload artifact
+      - name: Fazer upload dos relatórios para o GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: results/
 
-      - name: Deploy to Github Pages
+      - name: Deploy para o GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-
-    
