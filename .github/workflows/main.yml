@@ -31,8 +31,13 @@ jobs:
       - name: Subir ambiente com Docker Compose
         run: docker compose up -d
 
-      - name: Aguardar containers inicializarem
-        run: sleep 40
+      - name: Esperar o Android Emulador iniciar
+        run: |
+          echo "Aguardando emulador Android bootar..."
+          until docker exec android-container adb shell getprop sys.boot_completed | grep 1; do
+            sleep 5
+          done
+          echo "Emulador pronto!"
 
       - name: Executar testes Robot Framework
         run: |
