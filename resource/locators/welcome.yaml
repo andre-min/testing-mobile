@@ -1,4 +1,5 @@
 welcome:
-  title: //*[contains(@text, "Bem-vindo ao")]
+  title: OnBoardingHeader
   updatePopUp: android:id/button2
+  login: //android.widget.TextView[@resource-id="Typography" and @text="Already have a TED account? Sign in"]
   nextButton: Next
