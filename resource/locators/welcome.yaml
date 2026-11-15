@@ -1,4 +1,4 @@
 welcome:
-  title: android:id/alertTitle
+  title: //*[contains(@text, "Bem-vindo ao")]
   updatePopUp: android:id/button2
   nextButton: Next

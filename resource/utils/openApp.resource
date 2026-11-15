@@ -8,7 +8,7 @@ Open App
     ...    automationName=UiAutomator2
     ...    platformName=${PLATFORM_NAME}
     ...    deviceName=Android Emulator
-    ...    platformVersion=11.0
+    ...    platformVersion=11
     ...    app=/home/androidusr/app.apk
     ...    disableIdLocatorAutocompletion=${True}
 
